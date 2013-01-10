@@ -41,8 +41,12 @@ class Project(object):
         self.env = rpc_init(log)
 
         if settings.get('TESTING'):
-            log.debug('Overriding JIRA project from %s to TEST' % project_id)
-            project_id = settings.get('TEST_PROJECT')
+            test_project = settings.get('TEST_PROJECT')
+            log.debug(
+                'Overriding JIRA project from %s to %s' %
+                (project_id, test_project)
+            )
+            project_id = test_project
 
         projects = get_project_choices(self.env)
         if project_id not in projects:
