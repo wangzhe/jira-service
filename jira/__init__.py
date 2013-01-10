@@ -2,7 +2,7 @@ import os
 
 __all__ = ['settings']
 
-__title__ = 'jira'
+__title__ = 'jira-rpc'
 __version__ = '0.1'
 __description__ = 'Python client for JIRA SOAP API'
 __url__ = 'https://github.com/Maplecroft/jira-rpc'
