@@ -2,3 +2,4 @@
 *.sw[op]
 jira/config.ini
 *.egg-info
+dist
