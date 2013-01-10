@@ -27,6 +27,8 @@ If you have a *real* project called ``TEST``, you should change this by overridi
 Installation
 ============
 
-The only requirement is ``suds``::
+The only requirement is Suds_::
 
     pip install -r requirements.txt
+
+.. _Suds: https://fedorahosted.org/suds/
