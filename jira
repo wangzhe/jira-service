@@ -14,6 +14,7 @@ import logging
 import os
 import string
 import sys
+from suds.sax.text import Text
 import time
 from datetime import datetime
 import urllib
@@ -182,6 +183,7 @@ class JiraCat(JiraCommand):
                   'votes'
                   ]:
             logger.info(getName(f, fields) + ': ' + encode(results[f]))
+
         logger.info('Type: ' + getName(results['type'], jira_env['types']))
         logger.info('Status: ' + getName(results['status'], jira_env['statuses']))
         logger.info('Priority: ' + getName(results['priority'], jira_env['priorities']))
@@ -1395,7 +1397,7 @@ def encode(s):
     '''Deal with unicode in text fields'''
     if s == None:
         return "None"
-    if type(s) == unicode:
+    if type(s) == unicode or type(s) == Text:
         s = s.encode("utf-8")
     return str(s)
 
@@ -1408,17 +1410,24 @@ def dateStr(i):
         return "%04d/%02d/%02d %02d:%02d:%02d" % (i.year, i.month, i.day, i.hour, i.minute, i.second)
     return "%04d/%02d/%02d %02d:%02d:%02d" % (i[0], i[1], i[2], i[3], i[4], i[5])
 
+def convert(id):
+    '''Convert id to str'''
+    if type(id) == Text:
+        id = id.encode('utf-8')
+    return str(id)
+
+
 def getName(id, fields):
     '''TODO cache this, and note getCustomFields() needs admin privilege'''
     if id == None:
         return "None"
     if fields == None:
-        return id
+        return convert(id)
     for i, v in enumerate(fields):
         val = v['id']
         if val and val.lower() == id.lower():
-            return v['name']
-    return id.title()
+            return convert(v['name'])
+    return convert(id.title())
 
 def getChoicesStr(fields):
     """Concatentate the names of values in a structure"""
