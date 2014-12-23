@@ -463,15 +463,14 @@ Type 'jira create' for more detail on these options.
                 # "components": components,
                 # "affectsVersions": affectsVersions,
                 # "fixVersions": fixVersions,
-            print remoteIssue
-            # if options.parent == "":
-            #     return soap.service.createIssue(auth, remoteIssue)
-            # else:
-            #     methods = soap.wsdl.services[0].ports[0].methods.keys()
-            #     if methods.has_key('createSubtask'):
-            #         return soap.service.createSubtask(auth, remoteIssue, options.parent)
-            #     else:
-            #         logger.error('The current JIRA server does not support the command: createSubtask')
+            if options.parent == "":
+                return soap.service.createIssue(auth, remoteIssue)
+            else:
+                methods = soap.wsdl.services[0].ports[0].methods.keys()
+                if methods.has_key('createSubtask'):
+                    return soap.service.createSubtask(auth, remoteIssue, options.parent)
+                else:
+                    logger.error('The current JIRA server does not support the command: createSubtask')
         except Exception, e:
             logger.exception(e)
             # logger.error(decode(e))
