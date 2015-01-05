@@ -466,7 +466,6 @@ Type 'jira create' for more detail on these options.
                 # "fixVersions": fixVersions,
             if options.parent == "":
                 issue = soap.service.createIssue(auth, remoteIssue)
-                print "++++++++++++++++++++++++++++++++++++++++++++"
                 return issue
             else:
                 methods = soap.wsdl.services[0].ports[0].methods.keys()
@@ -673,10 +672,10 @@ class JiraGetIssues(JiraCommand):
     def run(self, logger, jira_env, args):
         global soap, auth
         if len(args) == 2:
-            args = args[0]
+            args = args[0].decode('utf-8')
             limit = int(args[1])
         elif len(args) == 1:
-            args = args[0]
+            args = args[0].decode('utf-8')
             limit = 100
         else:
             logger.error(self.usage)
@@ -1616,7 +1615,7 @@ def execute_command(options, args):
         if (command_name not in ['login']):
             logger.debug('Running command: ' + command_name)
             rc = com.run(command_name, logger, jira_env, args[1:])
-            sys.exit(rc)
+            return rc
         else:
             sys.exit(0)
     else:
