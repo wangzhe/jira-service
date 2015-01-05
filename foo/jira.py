@@ -377,7 +377,7 @@ Type 'jira create' for more detail on these options.
         parser.add_option("-f", "--field", dest="customfield",
                           default=[], action="append",
                           help="Custom field name and comma-separated values. E.g. -f \"field name 1:a,b\" -f \"field name 2:hello world\"\nChoices: %s" % cf_choices)
-        (options, args) = parser.parse_args()
+        (options, args) = parser.parse_args(args)
 
         # Check that the arguments with no defaults have been set
         if options.summary == None:
@@ -397,6 +397,7 @@ Type 'jira create' for more detail on these options.
             for i, v in enumerate(jira_env['types']):
                 if convertText2Str(v['name']) == options.issuetype:
                     issuetype = v['id']
+
             if issuetype == 0:
                 for i, v in enumerate(jira_env['subtypes']):
                     if v['name'] == options.issuetype:
@@ -454,9 +455,9 @@ Type 'jira create' for more detail on these options.
             remoteIssue = {
                 "project": options.project,
                 "type": issuetype,
-                "summary": options.summary,
+                "summary": options.summary.decode('utf-8'),
                 "priority": priority,
-                "description": options.description,
+                "description": options.description.decode('utf-8'),
                 "assignee": options.assignee,
                 "customFieldValues": cfv,
             }
@@ -464,7 +465,9 @@ Type 'jira create' for more detail on these options.
                 # "affectsVersions": affectsVersions,
                 # "fixVersions": fixVersions,
             if options.parent == "":
-                return soap.service.createIssue(auth, remoteIssue)
+                issue = soap.service.createIssue(auth, remoteIssue)
+                print "++++++++++++++++++++++++++++++++++++++++++++"
+                return issue
             else:
                 methods = soap.wsdl.services[0].ports[0].methods.keys()
                 if methods.has_key('createSubtask'):
@@ -1326,7 +1329,7 @@ class JiraDev(JiraCommand):
 
 
 class JiraUnitTest(JiraCommand):
-    name = "test"
+    name = "foo"
     summary = "Run unit tests on the JIRA CLI"
     usage = """
     """
@@ -1348,7 +1351,7 @@ class JiraUnitTest(JiraCommand):
         verbosity = False
         if options.loglevel < logging.INFO:
             verbosity = True
-        doctest.testfile("../test/cli/CliTests.log", verbose=verbosity, extraglobs=globs,
+        doctest.testfile("../foo/cli/CliTests.log", verbose=verbosity, extraglobs=globs,
                          optionflags=doctest.REPORT_UDIFF)
         logger.debug('Finished unit tests')
 
@@ -1561,27 +1564,10 @@ def start_login(options, jira_env, command_name, com, logger):
                 os.remove(jirarc_file)
 
 
-if (__name__ == "__main__"):
-    progname = sys.argv[0]
+def execute_command(options, args):
+    global logger, jira_env, server, command_name, soap, home, serverInfo, rc
+
     com = Commands()
-
-    parser = OptionParser(
-        "usage: %prog [options] <command>\n\nRun '%prog help' for a list of commands.\nRun '%prog help -v' for a list of commands and their options",
-        version="%prog 0.1")
-    parser.allow_interspersed_args = False
-    parser.add_option("-v", "--verbose", dest="loglevel", type="int",
-                      default=logging.INFO,
-                      help="Verbosity, default: %default, debug is " + str(logging.DEBUG))
-    parser.add_option("-s", "--server", dest="server", default="http://jira.example.com:80",
-                      help="JIRA server and port to use, default: %default")
-    # parser.add_option("-p", "--project", dest="project", default="CA",
-    #                      help="Project to use, default: %default")
-    parser.add_option("-u", "--user", dest="user", default=None,
-                      help="JIRA user to use, default: %default")
-    parser.add_option("-p", "--password", dest="password", default=None,
-                      help="JIRA password to use, default: %default")
-    (options, args) = parser.parse_args()
-
     logger = setupLogging(options.loglevel)
     jira_env = {}
     server = options.server + "/rpc/soap/jirasoapservice-v2?wsdl"
@@ -1590,8 +1576,8 @@ if (__name__ == "__main__"):
         server = 'http://' + server  # default is no SSL
     if len(args) == 0 or args[0] in ['help']:
         sys.exit(com.run("help", logger, jira_env, args[1:]))
-
     command_name = args[0]
+
     if len(args) > 1 and args[1] in ['--help', '-h']:
         if com.has(command_name):
             sys.exit(com.run(command_name, logger, jira_env, args[1:]))
@@ -1637,6 +1623,28 @@ if (__name__ == "__main__"):
         logger.error("Command '%s' not recognized." % (command_name))
         logger.error("  run '%s help' for a list of commands" % (progname))
         sys.exit(1)
+
+
+if (__name__ == "__main__"):
+    progname = sys.argv[0]
+    parser = OptionParser(
+        "usage: %prog [options] <command>\n\nRun '%prog help' for a list of commands.\nRun '%prog help -v' for a list of commands and their options",
+        version="%prog 0.1")
+    parser.allow_interspersed_args = False
+    parser.add_option("-v", "--verbose", dest="loglevel", type="int",
+                      default=logging.INFO,
+                      help="Verbosity, default: %default, debug is " + str(logging.DEBUG))
+    parser.add_option("-s", "--server", dest="server", default="http://jira.example.com:80",
+                      help="JIRA server and port to use, default: %default")
+    # parser.add_option("-p", "--project", dest="project", default="CA",
+    # help="Project to use, default: %default")
+    parser.add_option("-u", "--user", dest="user", default=None,
+                      help="JIRA user to use, default: %default")
+    parser.add_option("-p", "--password", dest="password", default=None,
+                      help="JIRA password to use, default: %default")
+
+    (options, args) = parser.parse_args()
+    execute_command(options, args)
 
 '''
 suds note:
