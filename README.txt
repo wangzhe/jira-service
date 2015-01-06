@@ -1,43 +1,9 @@
 
-                          Python CLI for JIRA
+                          Python Wechat-JIRA Service
 
-Matt Doar
-Consulting Toolsmiths
+Part of this project forked from Python CLI for JIRA
 http://www.pobox.com/~doar
 
-This CLI is an example of using Python and the JIRA SOAP API to
-interact with JIRA from the command line. There is also another Atlassian CLI
-written in Java at https://plugins.atlassian.com/plugin/details/6398
+I did some modification in the class of create and getissues, mainly for adopting Chinese in Jira system. This should worked on JIRA versions from 3.4 to 4.4. The program worked on both CLI and Python Program, although my implementation is a bit tricky. I will keep on improving the work.
 
-Usage:
-
-First make sure that SOAP access to your JIRA instance is enabled via 
-Admin, General Configuration, Accept remote API calls
-
-After download you shouldn't need to install anything, just unpack the
-package and run
-
-python ./jira
-
-at the command line and a list of the available commands should appear. For example:
-
-python ./jira -s http://localhost:8080 projects
-
-should prompt you to log in with your JIRA userid and password and
-then display a list of the available JIRA projects.
-
-Windows
--------
-
-Windows users can unzip the zip package and use the CLI in a similar way:
-
-C:\Python25\python.exe .\jira -s http://localhost:8080 projects
-
-If you need to access the code directly, you can use Subversion:
-
-svn checkout https://studio.plugins.atlassian.com/svn/JCLIMD/trunk JCLIMD
-
-
-Versions:
-
-The CLI should now work with JIRA versions from 3.4 to 4.2.
+Currently, I am mainly working on the communication between wechat and service. The destination is to implement a service, recording company events. Most of the data are inputed from Wechat and stored in Jira side, then shown in Wechat on demond.
