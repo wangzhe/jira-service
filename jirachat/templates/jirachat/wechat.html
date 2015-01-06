@@ -1,6 +1,7 @@
 {% extends "jirachat/base.html" %}
 
 {% block content %}
+<h2>this is wechat</h2>
 <ul/>
 {% for line in lines %}
 <li style="color:{% cycle 'blue' 'green' %}">{{ line.text }}</li>
