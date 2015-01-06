@@ -1,6 +1,6 @@
 import time
 from optparse import Values
-from foo.jira import (
+from module.jira import (
     execute_command,
 )
 from test import settings
