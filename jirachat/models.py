@@ -8,6 +8,6 @@ class Line(models.Model):
 
 class ServerInfo(models.Model):
     signature = models.CharField(max_length=255)
-    timestamp = models.DateTimeField('timestamp')
+    timestamp = models.CharField(max_length=255)
     nonce = models.CharField(max_length=255)
     echostr = models.CharField(max_length=255)
