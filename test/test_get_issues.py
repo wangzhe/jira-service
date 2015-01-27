@@ -18,6 +18,7 @@ occurred_time = 'customfield_10200:' + time.strftime("%d/%m/%y")
 if (__name__ == "__main__"):
     contents = {'loglevel': 20, 'password': password, 'user': username, 'server': 'http://bug.xingshulin.com'}
     options = Values(contents)
-    args = ['getissues', 'project = JCTP']
+    jsql = 'project = JCTP and type = ' + settings.get('ISSUE_PRD')
+    args = ['getissues', jsql, '5']
     results = execute_command(options, args)
     print results

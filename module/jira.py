@@ -672,8 +672,8 @@ class JiraGetIssues(JiraCommand):
     def run(self, logger, jira_env, args):
         global soap, auth
         if len(args) == 2:
-            args = args[0].decode('utf-8')
             limit = int(args[1])
+            args = args[0].decode('utf-8')
         elif len(args) == 1:
             args = args[0].decode('utf-8')
             limit = 100
@@ -694,7 +694,8 @@ class JiraGetIssues(JiraCommand):
         logger.info('key,created,summary')
         cmd_results = ''
         for issue in sorted(results, compareCreated):
-            result = ':\r\n'.join([encode(issue['created'])[0:10], unicode(issue['summary']), ])
+            occoured_time = encode(issue['customFieldValues'][0]['values'][0])
+            result = ':\r\n'.join([occoured_time, unicode(issue['summary']), ])
             cmd_results = cmd_results + result + '\r\n \r\n'
             logger.info(result)
         return cmd_results
