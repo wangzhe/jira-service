@@ -19,7 +19,5 @@ if (__name__ == "__main__"):
     contents = {'loglevel': 20, 'password': password, 'user': username, 'server': 'http://bug.xingshulin.com'}
     options = Values(contents)
     args = ['getissues', 'project = JCTP']
-    print '=========================='
     results = execute_command(options, args)
-    print '=========================='
     print results

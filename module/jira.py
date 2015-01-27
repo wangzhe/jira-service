@@ -461,9 +461,9 @@ Type 'jira create' for more detail on these options.
                 "assignee": options.assignee,
                 "customFieldValues": cfv,
             }
-                # "components": components,
-                # "affectsVersions": affectsVersions,
-                # "fixVersions": fixVersions,
+            # "components": components,
+            # "affectsVersions": affectsVersions,
+            # "fixVersions": fixVersions,
             if options.parent == "":
                 issue = soap.service.createIssue(auth, remoteIssue)
                 return issue
@@ -692,12 +692,12 @@ class JiraGetIssues(JiraCommand):
             return cmp(a['created'], b['created'])
 
         logger.info('key,created,summary')
+        cmd_results = ''
         for issue in sorted(results, compareCreated):
-            logger.info(','.join([encode(issue['key']),
-                                  encode(issue['created']),
-                                  unicode(issue['summary']),
-            ]))
-        return 0
+            result = ':\r\n'.join([encode(issue['created'])[0:10], unicode(issue['summary']), ])
+            cmd_results = cmd_results + result + '\r\n \r\n'
+            logger.info(result)
+        return cmd_results
 
 
 class JiraReport(JiraCommand):
@@ -803,12 +803,12 @@ class JiraDeactivateUser(JiraCommand):
             # anybody@zinio.com pjamieson@zinio.com	Anybody Interested
             active_userids = [
                 # '', #Rangnekar Shantanu
-                #'', #Spirupolo Jorge
+                # '', #Spirupolo Jorge
                 'admin',
                 'blynn',
                 'ashishp@bsquare.com',
-                'bmeduri',  #Meduri Bala
-                'choonyap',  #Yap Choon Hong
+                'bmeduri',  # Meduri Bala
+                'choonyap',  # Yap Choon Hong
                 'craigl@bsquare.com',
                 'dbrandt',
                 'eheiker',  #Heiker Eric
@@ -840,9 +840,9 @@ class JiraDeactivateUser(JiraCommand):
             ]
 
             jira_group_names = [  # 'atg-dev',
-                                  #'jira-administrators',
-                                  #'jira-atg',
-                                  #'jira-balthaser',
+                                  # 'jira-administrators',
+                                  # 'jira-atg',
+                                  # 'jira-balthaser',
                                   #'jira-bi',
                                   #'jira-bus-solutions',
                                   #'jira-dbas',
@@ -1020,7 +1020,7 @@ class JiraSyncVersions(JiraCommand):
                     versionObj = {'name': version['name'],
                                   'releaseDate': dateObj,
                                   # 'archived': version['archived'],
-                                  #                                 'released': version['released'],
+                                  # 'released': version['released'],
                     }
                     soap.service.addVersion(auth, dst_project, remoteVersion=versionObj)
             return 0
@@ -1069,7 +1069,7 @@ class JiraSyncComponents(JiraCommand):
                     # TODO get the user password again for REST
                     # TODO replace the URL with the local one
                     url = 'http://jira/secure/project/AddComponent.jspa?name=%s&pid=%s&os_username=%s&os_password=secret' % (
-                    comp_name, pkey, jira_env['jirauser'])
+                        comp_name, pkey, jira_env['jirauser'])
                     logger.info(
                         "Adding component %s to project %s using REST: %s" % (component['name'], dst_project, url))
                     urllib.urlopen(url).close()
@@ -1190,7 +1190,7 @@ class JiraAddVersion(JiraCommand):
         versionname = args[1]
         # RemoteVersion does not support the description
         year, month, day = args[2].split(':')
-        #        schedule = int(args[3])
+        # schedule = int(args[3])
         try:
             # https://fedorahosted.org/suds/ticket/219 seems to be fixed in 0.3.9
             pythonDate = datetime(int(year), int(month), int(day), 0, 0, 0, 0)
@@ -1208,7 +1208,7 @@ class JiraAddVersion(JiraCommand):
         except Exception, e:
             print e
             logger.exception(e)
-            #logger.error(decode(e))
+            # logger.error(decode(e))
 
 
 class JiraUpdate(JiraCommand):
@@ -1570,7 +1570,7 @@ def execute_command(options, args):
     logger = setupLogging(options.loglevel)
     jira_env = {}
     server = options.server + "/rpc/soap/jirasoapservice-v2?wsdl"
-    #server = options.server + "/rpc/soap/sharedspace-s1v1?wsdl"
+    # server = options.server + "/rpc/soap/sharedspace-s1v1?wsdl"
     if not server.startswith('http'):  # also catches https
         server = 'http://' + server  # default is no SSL
     if len(args) == 0 or args[0] in ['help']:

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
+
 from jirachat.models import ServerInfo
 from jirachat.views import handle_message
-import string
-import datetime
+
 
 # Create your tests here.
 

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.views.decorators.csrf import csrf_exempt
-
-import datetime
 from wechat_sdk import WechatBasic
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
+
 from .models import Line
 from .models import ServerInfo
+from module import constants
+from module.message import build_text_handler
 
 
 token = 'token'  # 你的微信 Token
@@ -21,29 +22,50 @@ def home(request):
 def wechat(request):
     if request.method == 'GET':
         wechatserviceinfo = request.GET
-        echostr = init_service(wechatserviceinfo)
-        return HttpResponse(echostr)
+        resp_text = init_service(wechatserviceinfo)
     elif request.method == 'POST':
         body_text = request.body
         resp_text = handle_message(body_text)
         print(resp_text)
-    return render_to_response("jirachat/wechat.html", {'infos': ServerInfo.objects.order_by("timestamp").reverse()[:1]})
+    return HttpResponse(resp_text)
 
 
 def init_service(wechatserviceinfo):
-    wechatsignature = wechatserviceinfo.get('signature', '')
-    wechattimestamp = wechatserviceinfo.get('timestamp', '')
-    wechatnonce = wechatserviceinfo.get('nonce', '')
+    wechatnonce, wechatsignature, wechattimestamp = wechat_get_paramaters(wechatserviceinfo)
     wechatechostr = wechatserviceinfo.get('echostr', '')
     create_service_info(wechatsignature, wechattimestamp, wechatnonce, wechatechostr)
     return wechatechostr
+
+
+def handle_message(body_text):
+    wechat = WechatBasic(token=token)
+    # 对签名进行校验
+    # wechatnonce, wechatsignature, wechattimestamp = wechat_get_paramaters(wechatserviceinfo)
+    # if not (wechat.check_signature(signature=wechatsignature, timestamp=wechattimestamp, nonce=wechatnonce)):
+    #     return
+    wechat.parse_data(body_text)
+    message = wechat.get_message()
+    try:
+        message_handler = build_handler(message)
+        resp_content = message_handler.process(message.content)
+    except Exception, e:
+        resp_content = constants.sys_err
+        print e
+    return wechat.response_text(resp_content)
+
+
+def wechat_get_paramaters(wechatserviceinfo):
+    wechatsignature = wechatserviceinfo.get('signature', '')
+    wechattimestamp = wechatserviceinfo.get('timestamp', '')
+    wechatnonce = wechatserviceinfo.get('nonce', '')
+    return wechatnonce, wechatsignature, wechattimestamp
 
 
 def get_last_service_info():
     return ServerInfo.objects.order_by("timestamp").reverse()[0]
 
 
-def handle_text_message(message, resp, wechat):
+def handle_text_message(message, wechat):
     if message.content == 'wechat':
         resp = wechat.response_text(u'^_^')
     else:
@@ -51,31 +73,18 @@ def handle_text_message(message, resp, wechat):
     return resp
 
 
-def handle_message(body_text):
-    # 实例化 wechat
-    wechat = WechatBasic(token=token)
-
-    # 对签名进行校验
-    # serviceinfo = get_last_service_info()
-    # if not (wechat.check_signature(signature=serviceinfo.signature, timestamp=serviceinfo.timestamp,
-    # nonce=serviceinfo.nonce)):
-    # return
-
-    # 对 XML 数据进行解析 (必要, 否则不可执行 response_text, response_image 等操作)
-    wechat.parse_data(body_text)
-    # 获得解析结果, message 为 WechatMessage 对象 (wechat_sdk.messages中定义)
-    message = wechat.get_message()
-    resp = None
-    if message.type == 'text':
-        resp = handle_text_message(message, resp, wechat)
-    elif message.type == 'image':
-        resp = wechat.response_text(u'图片')
-    else:
-        resp = wechat.response_text(u'未知')
-    return resp
-
-
-def create_service_info(signature='signation', timestamp="00000001", nonce="3456789", echostr="ertyui"):
+def create_service_info(signature='signature', timestamp="00000001", nonce="3456789", echostr="ertyui"):
     info = ServerInfo(signature=signature, timestamp=timestamp, nonce=nonce, echostr=echostr)
     info.save()
 
+
+def build_handler(message):
+    # build handler according to type and content
+    handler = None
+    if message.type == 'text':
+        handler = build_text_handler(message.content)
+    elif message.type == 'image':
+        handler = build_text_handler(message.content)
+    else:
+        pass
+    return handler
